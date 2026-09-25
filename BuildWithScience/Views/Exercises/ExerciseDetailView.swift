@@ -22,10 +22,44 @@ struct ExerciseDetailView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("How to Perform").font(.headline)
+                    Text("Setup").font(.headline)
                     Text(exercise.instructions)
                         .font(.body)
                         .foregroundStyle(.secondary)
+                }
+
+                if !exercise.steps.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Steps").font(.headline)
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(Array(exercise.steps.enumerated()), id: \.offset) { index, step in
+                                HStack(alignment: .top, spacing: 10) {
+                                    Text("\(index + 1)")
+                                        .font(.caption.bold())
+                                        .foregroundStyle(.white)
+                                        .frame(width: 20, height: 20)
+                                        .background(BWSTheme.primary)
+                                        .clipShape(Circle())
+                                    Text(step)
+                                        .font(.body)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if !exercise.coachingTip.isEmpty {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundStyle(BWSTheme.accent)
+                        Text(exercise.coachingTip)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding()
+                    .background(BWSTheme.accent.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                 }
             }
             .padding()

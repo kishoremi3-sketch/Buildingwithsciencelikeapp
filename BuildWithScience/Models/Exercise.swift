@@ -9,6 +9,8 @@ final class Exercise {
     var secondaryMuscles: [String]
     var equipment: String
     var instructions: String
+    var steps: [String]
+    var coachingTip: String
     var videoURLString: String?
     var isCompound: Bool
 
@@ -19,6 +21,8 @@ final class Exercise {
         secondaryMuscles: [String] = [],
         equipment: String,
         instructions: String,
+        steps: [String] = [],
+        coachingTip: String = "",
         videoURLString: String? = nil,
         isCompound: Bool = true
     ) {
@@ -28,6 +32,8 @@ final class Exercise {
         self.secondaryMuscles = secondaryMuscles
         self.equipment = equipment
         self.instructions = instructions
+        self.steps = steps
+        self.coachingTip = coachingTip
         self.videoURLString = videoURLString
         self.isCompound = isCompound
     }
