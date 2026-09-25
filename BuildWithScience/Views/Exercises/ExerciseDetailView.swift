@@ -1,5 +1,4 @@
 import SwiftUI
-import AVKit
 
 struct ExerciseDetailView: View {
     let exercise: Exercise
@@ -71,9 +70,30 @@ struct ExerciseDetailView: View {
     @ViewBuilder
     private var videoSection: some View {
         if let url = exercise.videoURL {
-            VideoPlayer(player: AVPlayer(url: url))
-                .frame(height: 220)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+            Link(destination: url) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(LinearGradient(colors: [BWSTheme.primary, BWSTheme.accent], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    VStack(spacing: 8) {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 40))
+                        Text("Watch Demo Video")
+                            .font(.subheadline.bold())
+                        if let source = exercise.videoSourceName {
+                            Text("Opens in browser · \(source)")
+                                .font(.caption2)
+                                .opacity(0.85)
+                        } else {
+                            Text("Opens in browser")
+                                .font(.caption2)
+                                .opacity(0.85)
+                        }
+                    }
+                    .foregroundStyle(.white)
+                }
+                .frame(height: 150)
+            }
+            .buttonStyle(.plain)
         } else {
             ZStack {
                 RoundedRectangle(cornerRadius: 16)
@@ -87,7 +107,7 @@ struct ExerciseDetailView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .frame(height: 180)
+            .frame(height: 150)
         }
     }
 }

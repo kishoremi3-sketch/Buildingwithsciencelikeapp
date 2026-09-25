@@ -12,6 +12,7 @@ final class Exercise {
     var steps: [String]
     var coachingTip: String
     var videoURLString: String?
+    var videoSourceName: String?
     var isCompound: Bool
 
     init(
@@ -24,6 +25,7 @@ final class Exercise {
         steps: [String] = [],
         coachingTip: String = "",
         videoURLString: String? = nil,
+        videoSourceName: String? = nil,
         isCompound: Bool = true
     ) {
         self.id = id
@@ -35,6 +37,7 @@ final class Exercise {
         self.steps = steps
         self.coachingTip = coachingTip
         self.videoURLString = videoURLString
+        self.videoSourceName = videoSourceName
         self.isCompound = isCompound
     }
 
