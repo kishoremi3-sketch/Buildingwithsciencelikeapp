@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="90 Days">
+<title>90 Day Reset</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --bg: #f4f6f5;
+  --card: #ffffff;
+  --text: #14201d;
+  --muted: #5d6b67;
+  --line: #e1e7e5;
+  --accent: #0f766e;
+  --accent-soft: #d5efec;
+  --good: #16a34a;
+  --warn: #d97706;
+  --off: #e7ecea;
+  --l1: #cdeee9; --l2: #8fd8cf; --l3: #3fb8a9; --l4: #0f8f82; --l5: #0b5f57;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0c1312;
+    --card: #15201e;
+    --text: #e8f0ee;
+    --muted: #93a39f;
+    --line: #24322f;
+    --accent: #2dd4bf;
+    --accent-soft: #123a35;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --off: #1e2a28;
+    --l1: #134a43; --l2: #17675d; --l3: #1d8b7c; --l4: #27b3a0; --l5: #5eead4;
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+}
+main { max-width: 520px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 22px; margin: 4px 0 2px; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+.muted { color: var(--muted); font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+.row { display: flex; align-items: center; gap: 12px; }
+.between { justify-content: space-between; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.btn { border: 0; border-radius: 12px; padding: 12px 16px; background: var(--accent); color: #fff; font-weight: 600; }
+@media (prefers-color-scheme: dark) { .btn { color: #04201c; } }
+.btn.ghost { background: var(--off); color: var(--text); }
+.btn.small { padding: 8px 12px; font-size: 14px; }
+.btn.block { width: 100%; }
+input[type=text], input[type=number], input[type=date], input[type=time] {
+  width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg);
+}
+label.field { display: block; margin-bottom: 12px; font-size: 14px; color: var(--muted); }
+label.field input { margin-top: 6px; color: var(--text); font-size: 16px; }
+
+/* Header / day nav */
+.daynav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.daynav button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); font-size: 20px; }
+.daynav button:disabled { opacity: .3; }
+.daynav .center { text-align: center; }
+
+/* Progress ring */
+.ring-wrap { display: flex; align-items: center; gap: 16px; }
+.ring { position: relative; width: 96px; height: 96px; flex: none; }
+.ring svg { transform: rotate(-90deg); }
+.ring .lbl { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 22px; line-height: 1.1; }
+.ring .lbl small { display: block; font-size: 11px; font-weight: 500; color: var(--muted); }
+
+/* Habits */
+.habit { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.habit:first-of-type { border-top: 0; padding-top: 4px; }
+.habit .ico { font-size: 26px; width: 36px; text-align: center; flex: none; }
+.habit .info { flex: 1; min-width: 0; }
+.habit .name { font-weight: 600; }
+.habit .sub { font-size: 13px; color: var(--muted); }
+.check {
+  width: 48px; height: 48px; border-radius: 14px; border: 2px solid var(--line); background: var(--bg);
+  display: grid; place-items: center; font-size: 24px; flex: none; transition: transform .1s;
+}
+.check:active { transform: scale(.92); }
+.check.on { background: var(--good); border-color: var(--good); color: #fff; }
+.steps-box { margin-top: 8px; }
+.steps-input { display: flex; gap: 8px; align-items: center; }
+.steps-input input { flex: 1; }
+.quick { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.quick button { flex: 1; min-width: 60px; padding: 8px 0; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-size: 14px; }
+.bar { height: 8px; border-radius: 4px; background: var(--off); overflow: hidden; margin-top: 8px; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .3s; }
+.bar.done > i { background: var(--good); }
+
+.perfect { text-align: center; padding: 12px; border-radius: 12px; background: var(--accent-soft); font-weight: 600; margin-top: 12px; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { background: var(--bg); border-radius: 12px; padding: 12px 8px; text-align: center; }
+.stat b { display: block; font-size: 24px; }
+.stat span { font-size: 12px; color: var(--muted); }
+.hbar { margin: 10px 0; }
+.hbar .row { font-size: 14px; }
+
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+.cell { aspect-ratio: 1; border-radius: 6px; background: var(--off); border: 0; padding: 0; font-size: 10px; color: var(--muted); }
+.cell.l1 { background: var(--l1); } .cell.l2 { background: var(--l2); } .cell.l3 { background: var(--l3); }
+.cell.l4 { background: var(--l4); color: #fff; } .cell.l5 { background: var(--l5); color: #fff; }
+.cell.today { outline: 2px solid var(--text); outline-offset: 1px; }
+.cell.future { opacity: .45; }
+.legend { display: flex; gap: 4px; align-items: center; justify-content: flex-end; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* Reward */
+.reward { text-align: center; }
+.reward .gift { font-size: 48px; }
+.reward h2 { margin: 6px 0; font-size: 20px; }
+.reward.unlocked { background: linear-gradient(135deg, var(--accent-soft), var(--card)); }
+
+/* Weight chart */
+svg.chart { width: 100%; height: 140px; display: block; }
+
+/* Tabs */
+nav.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; display: flex; background: var(--card); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom); z-index: 10;
+}
+nav.tabs button { flex: 1; border: 0; background: none; padding: 10px 0 12px; font-size: 12px; color: var(--muted); }
+nav.tabs button b { display: block; font-size: 22px; font-weight: normal; }
+nav.tabs button.active { color: var(--accent); font-weight: 600; }
+.hidden { display: none !important; }
+
+.toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 20px; font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 20; }
+.toast.show { opacity: 1; }
+textarea { width: 100%; min-height: 70px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font: inherit; color: inherit; resize: vertical; }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ===== Setup (first run) ===== -->
+  <section id="view-setup" class="hidden">
+    <h1>Let's start your 90 days 💪</h1>
+    <p class="muted">Five habits, every day, for 90 days. Then you've earned your treat.</p>
+    <div class="card">
+      <label class="field">Start date
+        <input type="date" id="s-start">
+      </label>
+      <label class="field">My reward after 90 days 🎁
+        <input type="text" id="s-reward" placeholder="e.g. New running shoes, weekend trip…">
+      </label>
+      <label class="field">Starting weight (optional)
+        <input type="number" id="s-weight" inputmode="decimal" step="0.1" placeholder="e.g. 82.5">
+      </label>
+      <div class="row">
+        <label class="field" style="flex:1">Bed by
+          <input type="time" id="s-bed" value="22:30">
+        </label>
+        <label class="field" style="flex:1">Wake by
+          <input type="time" id="s-wake" value="05:30">
+        </label>
+      </div>
+      <label class="field">Daily steps goal
+        <input type="number" id="s-steps" inputmode="numeric" value="12000">
+      </label>
+      <button class="btn block" id="s-go">Start my 90 days</button>
+    </div>
+  </section>
+
+  <!-- ===== Today ===== -->
+  <section id="view-today" class="hidden">
+    <div class="daynav">
+      <button id="prev" aria-label="Previous day">‹</button>
+      <div class="center">
+        <div style="font-weight:700" id="day-title">Day 1</div>
+        <div class="muted" id="day-date"></div>
+      </div>
+      <button id="next" aria-label="Next day">›</button>
+    </div>
+
+    <div class="card">
+      <div class="ring-wrap">
+        <div class="ring" id="ring"></div>
+        <div>
+          <div style="font-weight:700;font-size:18px" id="ring-msg">Let's go!</div>
+          <div class="muted" id="ring-sub"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="habits"></div>
+
+    <div class="card">
+      <h2>Weight & notes</h2>
+      <label class="field">Weight today (optional)
+        <input type="number" id="weight" inputmode="decimal" step="0.1" placeholder="—">
+      </label>
+      <textarea id="note" placeholder="How did today go? What did you eat? Workout?"></textarea>
+    </div>
+  </section>
+
+  <!-- ===== Progress ===== -->
+  <section id="view-progress" class="hidden">
+    <h1>Progress</h1>
+    <p class="muted" id="prog-sub"></p>
+
+    <div class="card reward" id="reward-card"></div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><b id="st-streak">0</b><span>🔥 Current streak</span></div>
+        <div class="stat"><b id="st-best">0</b><span>🏆 Best streak</span></div>
+        <div class="stat"><b id="st-perfect">0</b><span>⭐ Perfect days</span></div>
+      </div>
+      <p class="muted" style="margin:10px 0 0;text-align:center">A streak counts days with all 5 habits done.</p>
+    </div>
+
+    <div class="card">
+      <h2>90-day map</h2>
+      <div class="grid" id="grid"></div>
+      <div class="legend">0 <i style="background:var(--off)"></i><i style="background:var(--l1)"></i><i style="background:var(--l2)"></i><i style="background:var(--l3)"></i><i style="background:var(--l4)"></i><i style="background:var(--l5)"></i> 5</div>
+      <p class="muted" style="margin:8px 0 0">Tap a day to edit it.</p>
+    </div>
+
+    <div class="card">
+      <h2>Habit success rate</h2>
+      <div id="hbars"></div>
+    </div>
+
+    <div class="card">
+      <h2>Weight</h2>
+      <div id="wchart"></div>
+    </div>
+  </section>
+
+  <!-- ===== Settings ===== -->
+  <section id="view-settings" class="hidden">
+    <h1>Settings</h1>
+    <div class="card">
+      <label class="field">Start date
+        <input type="date" id="c-start">
+      </label>
+      <label class="field">My reward 🎁
+        <input type="text" id="c-reward">
+      </label>
+      <div class="row">
+        <label class="field" style="flex:1">Bed by
+          <input type="time" id="c-bed">
+        </label>
+        <label class="field" style="flex:1">Wake by
+          <input type="time" id="c-wake">
+        </label>
+      </div>
+      <label class="field">Daily steps goal
+        <input type="number" id="c-steps" inputmode="numeric">
+      </label>
+      <button class="btn block" id="c-save">Save</button>
+    </div>
+
+    <div class="card">
+      <h2>Backup</h2>
+      <p class="muted">Your data lives only on this phone. Export a backup every week or so, just in case.</p>
+      <div class="row">
+        <button class="btn ghost small" id="b-export" style="flex:1">⬇️ Export</button>
+        <button class="btn ghost small" id="b-import" style="flex:1">⬆️ Import</button>
+      </div>
+      <input type="file" id="b-file" accept="application/json,.json" class="hidden">
+    </div>
+
+    <div class="card">
+      <h2>Install on your phone</h2>
+      <p class="muted" style="margin:0">
+        <b>iPhone (Safari):</b> Share → <i>Add to Home Screen</i>.<br>
+        <b>Android (Chrome):</b> ⋮ menu → <i>Add to Home screen</i> / <i>Install app</i>.<br>
+        It then opens full-screen and works offline.
+      </p>
+    </div>
+
+    <div class="card">
+      <button class="btn ghost block" id="b-reset" style="color:#dc2626">Reset everything</button>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs hidden" id="tabs">
+  <button data-tab="today" class="active"><b>✅</b>Today</button>
+  <button data-tab="progress"><b>📈</b>Progress</button>
+  <button data-tab="settings"><b>⚙️</b>Settings</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+  const KEY = "ninety-day-reset-v1";
+  const TOTAL = 90;
+  const $ = (id) => document.getElementById(id);
+
+  const HABITS = [
+    { id: "bed",  ico: "🌙", name: "Early to bed",   sub: (c) => "In bed by " + fmtTime(c.bed) },
+    { id: "wake", ico: "🌅", name: "Early to rise",  sub: (c) => "Up by " + fmtTime(c.wake) },
+    { id: "food", ico: "🥗", name: "Ate clean",      sub: () => "Whole foods, no junk, no sugary drinks" },
+    { id: "steps",ico: "👟", name: "Steps",          sub: (c) => "Goal " + c.steps.toLocaleString() },
+    { id: "gym",  ico: "🏋️", name: "Gym session",    sub: () => "Showed up and trained" },
+  ];
+
+  // ---------- storage ----------
+  let state = load();
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { toast("Couldn't save — storage unavailable"); }
+  }
+
+  // ---------- dates (local, YYYY-MM-DD) ----------
+  function keyOf(d) {
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function parseKey(k) { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); }
+  function addDays(k, n) { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); }
+  function diffDays(a, b) { return Math.round((parseKey(b) - parseKey(a)) / 86400000); }
+  function todayKey() { return keyOf(new Date()); }
+  function fmtTime(t) {
+    const [h, m] = t.split(":").map(Number);
+    const ap = h >= 12 ? "pm" : "am";
+    return ((h % 12) || 12) + ":" + String(m).padStart(2, "0") + " " + ap;
+  }
+  function fmtDate(k, opts) { return parseKey(k).toLocaleDateString(undefined, opts || { weekday: "long", month: "short", day: "numeric" }); }
+
+  // ---------- derived ----------
+  function dayIndex(k) { return diffDays(state.start, k); } // 0-based
+  function endKey() { return addDays(state.start, TOTAL - 1); }
+  function entry(k) { return state.days[k] || {}; }
+  function done(e, h) {
+    if (h === "steps") return (e.steps || 0) >= state.cfg.steps;
+    return !!e[h];
+  }
+  function score(k) { const e = entry(k); return HABITS.filter((h) => done(e, h.id)).length; }
+  function lastCountedDay() {
+    // The last day that should count toward stats: today, clamped to the challenge window.
+    const t = todayKey();
+    if (diffDays(t, state.start) > 0) return null; // not started
+    return diffDays(t, endKey()) < 0 ? endKey() : t;
+  }
+  function streaks() {
+    const last = lastCountedDay();
+    let best = 0, run = 0, perfect = 0;
+    if (!last) return { current: 0, best: 0, perfect: 0 };
+    const n = dayIndex(last);
+    for (let i = 0; i <= n; i++) {
+      const k = addDays(state.start, i);
+      if (score(k) === HABITS.length) { run++; perfect++; best = Math.max(best, run); }
+      else run = 0;
+    }
+    // Current streak: don't break it just because today isn't finished yet.
+    let current = 0;
+    let k = last;
+    if (score(k) < HABITS.length && k === todayKey()) k = addDays(k, -1);
+    while (dayIndex(k) >= 0 && score(k) === HABITS.length) { current++; k = addDays(k, -1); }
+    return { current, best, perfect };
+  }
+
+  // ---------- UI state ----------
+  let viewing = null;
+  let tab = "today";
+
+  function boot() {
+    if (!state) { showSetup(); return; }
+    viewing = clampView(todayKey());
+    $("tabs").classList.remove("hidden");
+    show(tab);
+  }
+
+  function clampView(k) {
+    if (dayIndex(k) < 0) return state.start;
+    if (diffDays(k, endKey()) < 0) return endKey();
+    return k;
+  }
+
+  function show(name) {
+    tab = name;
+    ["setup", "today", "progress", "settings"].forEach((v) => $("view-" + v).classList.toggle("hidden", v !== name));
+    document.querySelectorAll("nav.tabs button").forEach((b) => b.classList.toggle("active", b.dataset.tab === name));
+    if (name === "today") renderToday();
+    if (name === "progress") renderProgress();
+    if (name === "settings") renderSettings();
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- setup ----------
+  function showSetup() {
+    $("s-start").value = todayKey();
+    $("view-setup").classList.remove("hidden");
+    $("s-go").onclick = () => {
+      const start = $("s-start").value || todayKey();
+      const steps = parseInt($("s-steps").value, 10) || 12000;
+      state = {
+        start,
+        reward: $("s-reward").value.trim() || "Something special",
+        cfg: { bed: $("s-bed").value || "22:30", wake: $("s-wake").value || "05:30", steps },
+        startWeight: parseFloat($("s-weight").value) || null,
+        days: {},
+      };
+      if (state.startWeight) state.days[start] = { weight: state.startWeight };
+      save();
+      $("view-setup").classList.add("hidden");
+      boot();
+    };
+  }
+
+  // ---------- today ----------
+  function renderToday() {
+    const k = viewing;
+    const idx = dayIndex(k);
+    const isToday = k === todayKey();
+    $("day-title").textContent = "Day " + (idx + 1) + " of " + TOTAL;
+    $("day-date").textContent = (isToday ? "Today · " : "") + fmtDate(k);
+    $("prev").disabled = idx <= 0;
+    $("next").disabled = idx >= TOTAL - 1 || diffDays(k, todayKey()) <= 0;
+
+    const e = entry(k);
+    const box = $("habits");
+    box.innerHTML = "<h2>" + (isToday ? "Today's habits" : "Habits") + "</h2>";
+    HABITS.forEach((h) => {
+      const row = document.createElement("div");
+      row.className = "habit";
+      if (h.id === "steps") {
+        const val = e.steps || 0;
+        const pct = Math.min(100, Math.round((val / state.cfg.steps) * 100));
+        const ok = val >= state.cfg.steps;
+        row.style.alignItems = "flex-start";
+        row.innerHTML =
+          '<div class="ico">' + h.ico + '</div>' +
+          '<div class="info">' +
+            '<div class="row between"><div class="name">' + h.name + '</div><div class="sub"><b>' + val.toLocaleString() + "</b> / " + state.cfg.steps.toLocaleString() + (ok ? " ✅" : "") + "</div></div>" +
+            '<div class="bar' + (ok ? " done" : "") + '"><i style="width:' + pct + '%"></i></div>' +
+            '<div class="steps-box"><div class="steps-input"><input type="number" inputmode="numeric" placeholder="Enter total steps" value="' + (val || "") + '"></div>' +
+            '<div class="quick"><button data-add="1000">+1k</button><button data-add="2000">+2k</button><button data-add="5000">+5k</button><button data-set="' + state.cfg.steps + '">Hit goal</button></div></div>' +
+          "</div>";
+        const input = row.querySelector("input");
+        input.addEventListener("change", () => { setVal(k, "steps", Math.max(0, parseInt(input.value, 10) || 0)); });
+        row.querySelectorAll("button[data-add]").forEach((b) => b.onclick = () => setVal(k, "steps", (entry(k).steps || 0) + Number(b.dataset.add)));
+        row.querySelector("button[data-set]").onclick = (ev) => setVal(k, "steps", Number(ev.currentTarget.dataset.set));
+      } else {
+        const on = !!e[h.id];
+        row.innerHTML =
+          '<div class="ico">' + h.ico + '</div>' +
+          '<div class="info"><div class="name">' + h.name + '</div><div class="sub">' + h.sub(state.cfg) + "</div></div>" +
+          '<button class="check' + (on ? " on" : "") + '" aria-pressed="' + on + '" aria-label="' + h.name + '">' + (on ? "✓" : "") + "</button>";
+        row.querySelector(".check").onclick = () => {
+          setVal(k, h.id, !entry(k)[h.id]);
+          if (navigator.vibrate) navigator.vibrate(15);
+        };
+      }
+      box.appendChild(row);
+    });
+
+    const s = score(k);
+    if (s === HABITS.length) {
+      const p = document.createElement("div");
+      p.className = "perfect";
+      p.textContent = "⭐ Perfect day! All 5 habits done.";
+      box.appendChild(p);
+    }
+
+    renderRing(s);
+    const st = streaks();
+    $("ring-msg").textContent = s === 5 ? "Crushed it! 🔥" : s >= 3 ? "Almost there" : s > 0 ? "Good start" : isToday ? "Let's go!" : "Nothing logged";
+    $("ring-sub").textContent = "🔥 " + st.current + "-day streak · " + Math.max(0, TOTAL - 1 - dayIndex(lastCountedDay() || state.start)) + " days to reward";
+
+    const w = $("weight");
+    w.value = e.weight != null ? e.weight : "";
+    w.onchange = () => { const v = parseFloat(w.value); setVal(k, "weight", isNaN(v) ? null : v, true); };
+    const n = $("note");
+    n.value = e.note || "";
+    n.onchange = () => setVal(k, "note", n.value, true);
+  }
+
+  function renderRing(s) {
+    const r = 42, c = 2 * Math.PI * r, off = c * (1 - s / HABITS.length);
+    $("ring").innerHTML =
+      '<svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="' + r + '" fill="none" stroke="var(--off)" stroke-width="9"/>' +
+      '<circle cx="48" cy="48" r="' + r + '" fill="none" stroke="' + (s === 5 ? "var(--good)" : "var(--accent)") + '" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + off + '" style="transition:stroke-dashoffset .4s"/></svg>' +
+      '<div class="lbl"><div>' + s + "/5<small>habits</small></div></div>";
+  }
+
+  function setVal(k, field, val, quiet) {
+    const e = Object.assign({}, entry(k));
+    if (val === null || val === "" ) delete e[field]; else e[field] = val;
+    state.days[k] = e;
+    save();
+    if (!quiet) renderToday();
+  }
+
+  // ---------- progress ----------
+  function renderProgress() {
+    const last = lastCountedDay();
+    const daysIn = last ? dayIndex(last) + 1 : 0;
+    $("prog-sub").textContent = fmtDate(state.start, { month: "short", day: "numeric" }) + " → " + fmtDate(endKey(), { month: "short", day: "numeric", year: "numeric" }) + " · " + daysIn + " of " + TOTAL + " days";
+
+    const st = streaks();
+    $("st-streak").textContent = st.current;
+    $("st-best").textContent = st.best;
+    $("st-perfect").textContent = st.perfect;
+
+    // Reward
+    const rc = $("reward-card");
+    const left = TOTAL - daysIn;
+    const finished = diffDays(todayKey(), endKey()) < 0 || (todayKey() === endKey() && score(endKey()) === 5);
+    let total = 0;
+    for (let i = 0; i < daysIn; i++) total += score(addDays(state.start, i));
+    const consistency = daysIn ? Math.round((total / (daysIn * HABITS.length)) * 100) : 0;
+    rc.classList.toggle("unlocked", finished);
+    rc.innerHTML = finished
+      ? '<div class="gift">🎉</div><h2>' + esc(state.reward) + ' — unlocked!</h2><div class="muted">You did 90 days with ' + consistency + "% consistency. Go treat yourself!</div>"
+      : '<div class="gift">🎁</div><h2>' + esc(state.reward) + '</h2><div class="muted"><b>' + left + "</b> day" + (left === 1 ? "" : "s") + " to go · " + consistency + "% consistency so far</div>" +
+        '<div class="bar" style="margin-top:12px"><i style="width:' + Math.round((daysIn / TOTAL) * 100) + '%"></i></div>';
+
+    // Grid
+    const g = $("grid");
+    g.innerHTML = "";
+    const t = todayKey();
+    for (let i = 0; i < TOTAL; i++) {
+      const k = addDays(state.start, i);
+      const b = document.createElement("button");
+      const future = diffDays(t, k) > 0;
+      const s = future ? 0 : score(k);
+      b.className = "cell" + (s ? " l" + s : "") + (k === t ? " today" : "") + (future ? " future" : "");
+      b.textContent = i + 1;
+      b.setAttribute("aria-label", "Day " + (i + 1) + ": " + s + " of 5");
+      if (!future) b.onclick = () => { viewing = k; show("today"); };
+      g.appendChild(b);
+    }
+
+    // Habit bars
+    const hb = $("hbars");
+    hb.innerHTML = "";
+    HABITS.forEach((h) => {
+      let c = 0;
+      for (let i = 0; i < daysIn; i++) if (done(entry(addDays(state.start, i)), h.id)) c++;
+      const pct = daysIn ? Math.round((c / daysIn) * 100) : 0;
+      const d = document.createElement("div");
+      d.className = "hbar";
+      d.innerHTML = '<div class="row between"><span>' + h.ico + " " + h.name + '</span><span class="muted">' + c + "/" + daysIn + " · " + pct + '%</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
+      hb.appendChild(d);
+    });
+
+    renderWeight();
+  }
+
+  function renderWeight() {
+    const pts = Object.keys(state.days).filter((k) => state.days[k].weight != null).sort().map((k) => ({ k, w: state.days[k].weight }));
+    const box = $("wchart");
+    if (pts.length < 2) { box.innerHTML = '<p class="muted" style="margin:0">Log your weight on at least two days to see a trend. Once a week is plenty.</p>'; return; }
+    const W = 320, H = 140, P = 24;
+    const ws = pts.map((p) => p.w);
+    let lo = Math.min(...ws), hi = Math.max(...ws);
+    if (hi - lo < 1) { hi += 0.5; lo -= 0.5; }
+    const x0 = parseKey(pts[0].k), span = Math.max(1, diffDays(pts[0].k, pts[pts.length - 1].k));
+    const X = (k) => P + ((parseKey(k) - x0) / 86400000 / span) * (W - 2 * P);
+    const Y = (w) => P / 2 + (1 - (w - lo) / (hi - lo)) * (H - P - P / 2);
+    const path = pts.map((p, i) => (i ? "L" : "M") + X(p.k).toFixed(1) + " " + Y(p.w).toFixed(1)).join(" ");
+    const dots = pts.map((p) => '<circle cx="' + X(p.k).toFixed(1) + '" cy="' + Y(p.w).toFixed(1) + '" r="3.5" fill="var(--accent)"/>').join("");
+    const change = pts[pts.length - 1].w - pts[0].w;
+    box.innerHTML =
+      '<div class="row between" style="margin-bottom:6px"><span><b>' + pts[pts.length - 1].w + '</b> <span class="muted">latest</span></span>' +
+      '<span style="font-weight:600;color:' + (change <= 0 ? "var(--good)" : "var(--warn)") + '">' + (change > 0 ? "+" : "") + change.toFixed(1) + " since start</span></div>" +
+      '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none">' +
+      '<text x="2" y="' + (Y(hi) + 4) + '" font-size="10" fill="var(--muted)">' + hi.toFixed(1) + "</text>" +
+      '<text x="2" y="' + (Y(lo) + 4) + '" font-size="10" fill="var(--muted)">' + lo.toFixed(1) + "</text>" +
+      '<path d="' + path + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' + dots + "</svg>";
+  }
+
+  // ---------- settings ----------
+  function renderSettings() {
+    $("c-start").value = state.start;
+    $("c-reward").value = state.reward;
+    $("c-bed").value = state.cfg.bed;
+    $("c-wake").value = state.cfg.wake;
+    $("c-steps").value = state.cfg.steps;
+  }
+  $("c-save").onclick = () => {
+    state.start = $("c-start").value || state.start;
+    state.reward = $("c-reward").value.trim() || state.reward;
+    state.cfg.bed = $("c-bed").value || state.cfg.bed;
+    state.cfg.wake = $("c-wake").value || state.cfg.wake;
+    state.cfg.steps = parseInt($("c-steps").value, 10) || state.cfg.steps;
+    save();
+    viewing = clampView(todayKey());
+    toast("Saved");
+  };
+  $("b-export").onclick = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "90-day-reset-backup-" + todayKey() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  };
+  $("b-import").onclick = () => $("b-file").click();
+  $("b-file").onchange = (ev) => {
+    const f = ev.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const data = JSON.parse(r.result);
+        if (!data.start || !data.cfg || !data.days) throw new Error("bad");
+        state = data;
+        save();
+        viewing = clampView(todayKey());
+        toast("Backup restored");
+        renderSettings();
+      } catch (e) { toast("That file isn't a valid backup"); }
+    };
+    r.readAsText(f);
+    ev.target.value = "";
+  };
+  $("b-reset").onclick = () => {
+    if (!confirm("Delete all your progress and start over? This can't be undone.")) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    location.reload();
+  };
+
+  // ---------- nav ----------
+  $("prev").onclick = () => { viewing = addDays(viewing, -1); renderToday(); };
+  $("next").onclick = () => { viewing = addDays(viewing, 1); renderToday(); };
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.onclick = () => {
+    if (b.dataset.tab === "today" && tab === "today") viewing = clampView(todayKey());
+    show(b.dataset.tab);
+  });
+  // Coming back to the app on a new day → jump to today.
+  let lastSeen = todayKey();
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && state && todayKey() !== lastSeen) {
+      lastSeen = todayKey();
+      viewing = clampView(lastSeen);
+      show(tab);
+    }
+  });
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  let tt;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 1800); }
+
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
